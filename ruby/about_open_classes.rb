@@ -44,7 +44,7 @@ class AboutOpenClasses < Neo::Koan
   # become enlightened about scope.
 
   # Explanation:
-  # Integer is a builting class and so it lies in the main scope.
+  # Integer is a builtin class and so it lies in the main scope.
   # Our class declaration lies in the scope of 'AboutOpenClasses' class
   # So we use '::' to go to the main class and open the Integer class.
 end
