@@ -7,3 +7,4 @@ all the question asked within.
 Currently contains:
  - Ruby
  - Clojure
+ - Erlang
