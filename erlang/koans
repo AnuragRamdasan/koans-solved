@@ -1,0 +1,58 @@
+#!/usr/bin/env escript
+
+main([Arg]) ->
+  case Arg of
+    "test" ->
+      recompile(test),
+      runner:test();
+    "hint" ->
+      recompile(run),
+      runner:hint();
+    _ ->
+      usage()
+  end;
+
+main([]) ->
+  recompile(run),
+  runner:run();
+
+main(_) ->
+  usage().
+
+clean_ebin() ->
+  file:make_dir("./ebin"),
+  {ok, Filenames} = file:list_dir("./ebin"),
+  lists:foreach(fun(File) -> file:delete(string:concat("./ebin/", File)) end, Filenames).
+
+compile_resources(Macro) ->
+  {ok, Filenames} = file:list_dir("./resources"),
+  lists:foreach(fun(File) -> compile:file(string:concat("./resources/", File), [{outdir, "./ebin"}, {d, Macro}]) end, Filenames).
+
+compile_src() ->
+  {ok, Filenames} = file:list_dir("./src"),
+  lists:foreach(fun(File) -> compile:file(string:concat("./src/", File), [{outdir, "./ebin"}, {parse_transform, underscore}]) end, Filenames).
+
+compile_test() ->
+  {ok, Filenames} = file:list_dir("./test"),
+  lists:foreach(fun(File) -> compile:file(string:concat("./test/", File), [{outdir, "./ebin"}]) end, Filenames).
+
+set_path() ->
+  code:add_pathz("./ebin/").
+
+load_compiled_code() ->
+  {ok, Filenames} = file:list_dir("./ebin"),
+  lists:foreach(fun(File) ->
+    Module = string:substr(File, 1, length(File) - 5),
+    code:load_file((list_to_atom(Module)))
+  end, Filenames).
+
+usage() ->
+  io:format("Usage\n  \`koans\`      # Run the koans\n  \`koans test\` # Run the development tests\n  \`koans hint` # Show a hint\n  \`koans help\` # This help screen\n").
+
+recompile(Type) ->
+  clean_ebin(),
+  set_path(),
+  compile_resources(Type),
+  compile_src(),
+  compile_test(),
+  load_compiled_code().
